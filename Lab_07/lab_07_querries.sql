@@ -1,0 +1,164 @@
+
+
+-- a --
+SELECT DIVISION_NAME, COUNT(*) Districts FROM DISTRICT
+GROUP BY division_name;
+
+
+-- b --
+SELECT CITIZEN.district_name, COUNT(Citizen.NID) AS People
+FROM CITIZEN , DISTRICT 
+WHERE CITIZEN.district_name = DISTRICT.NAME
+HAVING COUNT(CITIZEN.NID) >= 20000
+GROUP BY CITIZEN.district_name;
+
+
+-- c --
+SELECT COUNT(ACCIDENT_ID) Accidents 
+FROM ACCIDENT, License, CITIZEN
+where Citizen.license_ID = License.license_ID 
+    AND ACCIDENT.license_ID = License.license_ID 
+        AND Citizen.NID = 210;
+
+
+-- d --
+SELECT ROWNUM AS RANK, name
+FROM(SELECT Hospital.name, COUNT(HospitalSystem.id)
+     FROM HOSPITAL, HospitalSystem
+     WHERE hospital.hospital_id = HospitalSystem.hospital_id
+     GROUP BY Hospital.name)
+WHERE ROWNUM <= 5;
+
+
+-- e --
+SELECT CITIZEN.NAME, BloodGroup FROM CITIZEN, HospitalSystem
+WHERE CITIZEN.NID = HospitalSystem.NID;
+
+
+-- f --
+SELECT division.name, Total/(capacity)
+FROM(SELECT DIVISION.NAME, COUNT(CITIZEN.NID) AS TOTAL
+        FROM division, CITIZEN
+        where DIVISION.name = division_name
+        GROUP BY DIVISION.name);
+
+
+-- g --
+SELECT ROWNUM AS RANK, DIVISIN.name
+FROM(SELECT Division.NAME, TOTAL/(capacity)
+     FROM(SELECT Division.NAME, COUNT(NID) AS TOTAL
+     FROM DIVISION , CITIZEN 
+     WHERE DIVISION.name = division_name
+     GROUP BY Division.name))
+WHERE ROWNUM <= 3;
+
+
+-- h --
+SELECT DISTRICT.NAME, COUNT(ACCIDENT_ID) as accidents
+FROM DISTRICT , CITIZEN , License, ACCIDENT
+WHERE DISTRICT.name = CITIZEN.district_name 
+    AND CITIZEN.LICENSE_ID = License.LICENSE_ID 
+    AND License.LICENSE_ID = ACCIDENT.LICENSE_ID
+GROUP BY DISTRICT.NAME;
+
+
+-- i --
+SELECT NAME FROM 
+( SELECT DIVISION.NAME, COUNT(ACCIDENT_ID) AS ACCIDENTS
+  FROM DIVISION , CITIZEN, ACCIDENT, LICENSE
+  WHERE CITIZEN.LICENSE_ID = License.LICENSE_ID 
+  AND License.LICENSE_ID = ACCIDENT.LICENSE_ID 
+  AND DIVISION.name = CITIZEN.division_name
+  GROUP BY DIVISION.NAME
+  ORDER BY ACCIDENTS 
+) WHERE ROWNUM <= 1;
+    
+
+-- j --
+SELECT COUNT(ACCIDENT_ID) AS ACCIDENTS
+FROM ACCIDENT, LICENSE
+WHERE ACCIDENT.LICENSE_ID = LICENSE.LICENSE_ID 
+      AND (LICENSE.TYPE = 'Professional'
+        OR LICENSE.TYPE = 'Non-professional');
+
+
+-- k --
+SELECT ROWNUM AS RANK, NAME
+FROM(SELECT Citizen.NAME, (HS.release_date - HS.admission_date) AS TIME
+    FROM CITIZEN, HospitalSystem HS
+    WHERE Citizen.NID = HS.NID
+    ORDER BY TIME DESC)
+WHERE ROWNUM <= 1;
+
+
+-- l --
+SELECT ROWNUM AS RANK, NAME
+FROM(SELECT DIVISION.NAME, COUNT(NID) AS TOTAL
+    FROM DIVISION , CITIZEN 
+    WHERE DIVISION.NAME = division_name 
+        AND  (CAST(GetDate() AS Date)) - DOB>= 15  
+        AND  (CAST(GetDate() AS Date))-DOB <= 30 
+    ORDER BY TOTAL DESC)
+WHERE ROWNUM <= 1;  
+
+
+-- m --
+SELECT NAME
+FROM CITIZEN, License L
+WHERE Citizen.LICENSE_ID = L.LICENSE_ID AND (CAST(GetDate() AS Date)) > L.expiry;
+
+
+-- n --
+SELECT COUNT(ACCIDENT_ID) AS ACCIDENTS
+FROM ACCIDENT, LICENSE
+WHERE ACCIDENT.LICENSE_ID = LICENSE.LICENSE_ID 
+      AND (CAST(GetDate() AS Date)) > expiry;
+
+
+-- o --
+SELECT L.License_ID
+FROM LICENSE L
+WHERE L.License_ID NOT IN 
+(SELECT ACCIDENT.License_ID FROM ACCIDENT);
+
+
+-- p --
+SELECT D.NAME, DEATHS
+FROM DIVISION D, CITIZEN C, License L, ACCIDENT A
+WHERE D.NAME = C.division_name
+    AND C.LICENSE_ID = L.LICENSE_ID 
+    AND L.LICENSE_ID = A.LICENSE_ID;
+
+
+-- q --
+SELECT C.NAME FROM CITIZEN C, LICENSE L
+WHERE C.LICENSE_ID = L.LICENSE_ID
+    AND ( ( (CAST(GetDate() AS Date)) - DOB) <=22 OR ( (CAST(GetDate() AS Date)) - DOB) >=40); 
+
+
+-- r --
+SELECT C.NAME
+FROM CITIZEN C, LICENSE L, ACCIDENT A, HospitalSystem HS
+WHERE C.LICENSE_ID = L.LICENSE_ID 
+    AND L.LICENSE_ID = A.LICENSE_ID 
+    AND A.ACCIDENT_DATE = HS.admission_date;
+
+
+-- s --
+SELECT NAME
+FROM(SELECT H.NAME, COUNT(C.NID) AS TOTAL
+     FROM HOSPITAL H, HospitalSystem HS, CITIZEN C
+     WHERE C.division_name = 'Dhaka'
+        AND HS.HOSPITAL_ID = H.HOSPITAL_ID
+     GROUP BY H.NAME
+     ORDER BY TOTAL DESC)
+WHERE ROWNUM <= 1;
+
+
+-- t --
+SELECT C.NAME
+FROM CITIZEN C, ACCIDENT A, License L
+WHERE C.LICENSE_ID = L.LICENSE_ID AND A.LICENSE_ID = L.LICENSE_ID
+    AND A.LOCATION NOT IN (SELECT C.district_name FROM CITIZEN);
+
+
