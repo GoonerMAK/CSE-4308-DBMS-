@@ -70,6 +70,14 @@ create table teaches
 	 foreign key (ID) references instructor (ID) on delete cascade
 	);
 
+create table student
+	(ID varchar(5), 
+	 name varchar(20) not null, 
+	 dept_name varchar(20), 
+	 tot_cred numeric(3,0) check (tot_cred >= 0),
+	 primary key (ID),
+	 foreign key (dept_name) references department (dept_name) on delete set null
+	);
 
 create table takes
 	(ID varchar(5), 
@@ -87,10 +95,8 @@ create table advisor
 	(s_ID varchar(5),
 	 i_ID varchar(5),
 	 primary key (s_ID),
-	 foreign key (i_ID) references instructor (ID)
-		on delete set null,
-	 foreign key (s_ID) references student (ID)
-		on delete cascade
+	 foreign key (i_ID) references instructor (ID) on delete set null,
+	 foreign key (s_ID) references student (ID) on delete cascade
 	);
 
 create table time_slot
